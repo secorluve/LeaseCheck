@@ -1,4 +1,5 @@
-import { AnalysisMode, Prisma, RequestStatus, RiskSeverity } from '@prisma/client'
+import prismaClientPkg from '@prisma/client'
+import type { Prisma, RiskSeverity as RiskSeverityType } from '@prisma/client'
 import { prisma } from '../../lib/prisma'
 import { ApiError } from '../../utils/api-error'
 import { detectPlatformFromUrl, fromPrismaPlatform, normalizeAnalysisMode, normalizeSeverity, toHumanVerdict, toPrismaPlatform, toPrismaVerdict } from '../../utils/platform'
@@ -15,6 +16,8 @@ import type {
 import { AiAnalysisService } from '../ai/ai-analysis.service'
 import { HeuristicAnalysisService } from './heuristic-analysis.service'
 import { ListingExtractorService } from './listing-extractor.service'
+
+const { AnalysisMode, Prisma: PrismaRuntime, RequestStatus, RiskSeverity } = prismaClientPkg
 
 const riskRecommendationMap: Record<string, string> = {
   prepayment_request: 'Запросите документы и не переводите деньги до реального просмотра квартиры.',
@@ -158,7 +161,7 @@ function buildRecommendations(finalRecommendation: string, risks: RiskItemDto[])
   ])
 }
 
-function mapSeverityForStorage(value: string): RiskSeverity {
+function mapSeverityForStorage(value: string): RiskSeverityType {
   if (value === 'high') return RiskSeverity.HIGH
   if (value === 'medium') return RiskSeverity.MEDIUM
   return RiskSeverity.LOW
@@ -349,7 +352,7 @@ export class AnalysisService {
               : AnalysisMode.HEURISTIC_ONLY,
             aiProvider: aiAttempt?.provider ?? null,
             aiModel: aiAttempt?.model ?? null,
-            aiRawResponse: aiAttempt?.rawText ? ({ rawText: aiAttempt.rawText } as Prisma.InputJsonValue) : Prisma.JsonNull,
+            aiRawResponse: aiAttempt?.rawText ? ({ rawText: aiAttempt.rawText } as Prisma.InputJsonValue) : PrismaRuntime.JsonNull,
             heuristicSignals: heuristic.risks as unknown as Prisma.InputJsonValue,
             positiveSignals: heuristic.positiveSignals as unknown as Prisma.InputJsonValue,
             uncertaintySignals: heuristic.uncertaintySignals as unknown as Prisma.InputJsonValue,

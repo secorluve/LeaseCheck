@@ -1,7 +1,10 @@
-import { PrismaClient } from '@prisma/client'
+import prismaClientPkg from '@prisma/client'
+import type { PrismaClient as PrismaClientType } from '@prisma/client'
+
+const { PrismaClient } = prismaClientPkg
 
 const globalForPrisma = globalThis as typeof globalThis & {
-  __leasecheckPrisma?: PrismaClient
+  __leasecheckPrisma?: PrismaClientType
 }
 
 export const prisma =

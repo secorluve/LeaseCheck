@@ -1,5 +1,8 @@
-import { ListingPlatform } from '@prisma/client'
+import prismaClientPkg from '@prisma/client'
+import type { ListingPlatform as ListingPlatformType } from '@prisma/client'
 import type { AnalysisModeValue, HumanVerdict, PlatformSlug, RiskSeverityValue } from '../types/api'
+
+const { ListingPlatform } = prismaClientPkg
 
 const hostMatchers: Array<{ match: RegExp; platform: PlatformSlug }> = [
   { match: /(^|\.)krisha\.kz$/i, platform: 'krisha' },
@@ -17,7 +20,7 @@ export function detectPlatformFromUrl(url: string): PlatformSlug {
   }
 }
 
-export function toPrismaPlatform(platform: PlatformSlug): ListingPlatform {
+export function toPrismaPlatform(platform: PlatformSlug): ListingPlatformType {
   switch (platform) {
     case 'krisha':
       return ListingPlatform.KRISHA
@@ -32,7 +35,7 @@ export function toPrismaPlatform(platform: PlatformSlug): ListingPlatform {
   }
 }
 
-export function fromPrismaPlatform(platform: ListingPlatform): PlatformSlug {
+export function fromPrismaPlatform(platform: ListingPlatformType): PlatformSlug {
   switch (platform) {
     case ListingPlatform.KRISHA:
       return 'krisha'
