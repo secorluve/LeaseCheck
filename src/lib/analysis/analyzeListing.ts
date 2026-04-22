@@ -73,7 +73,7 @@ export async function analyzeListing(input: AnalysisInput): Promise<AnalysisResu
       ok: false,
       error: {
         code: 'analysis_failed',
-        message: error instanceof Error ? error.message : 'Не удалось выполнить анализ объявления',
+        message: error instanceof Error ? error.message : 'Не удалось выполнить анализ объявления.',
       },
     }
   }
