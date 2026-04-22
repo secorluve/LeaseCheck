@@ -10,24 +10,16 @@ interface HeroSectionProps {
 
 export function HeroSection({ onAnalyze, isLoading }: HeroSectionProps) {
   const [url, setUrl] = useState('')
-  const [title, setTitle] = useState('')
-  const [location, setLocation] = useState('')
-  const [price, setPrice] = useState('')
-  const [manualText, setManualText] = useState('')
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
 
-    if (!url.trim() && !manualText.trim()) {
+    if (!url.trim()) {
       return
     }
 
     onAnalyze({
-      url: url.trim() || undefined,
-      title: title.trim() || undefined,
-      location: location.trim() || undefined,
-      price: price.trim() ? Number(price.trim()) : undefined,
-      manualText: manualText.trim() || undefined,
+      url: url.trim(),
     })
   }
 
@@ -49,7 +41,7 @@ export function HeroSection({ onAnalyze, isLoading }: HeroSectionProps) {
             Проверь объявление на риск мошенничества
           </h1>
           <p className="text-xl text-muted-foreground">
-            Вставьте ссылку на объявление или добавьте текст вручную, если площадка блокирует парсинг.
+            Вставьте ссылку на объявление, и LeaseCheck проанализирует риски, надежность и рекомендации.
           </p>
         </motion.div>
 
@@ -58,7 +50,7 @@ export function HeroSection({ onAnalyze, isLoading }: HeroSectionProps) {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.2 }}
           onSubmit={handleSubmit}
-          className="mt-12 space-y-4"
+          className="mt-12 space-y-6"
         >
           <input
             type="url"
@@ -69,44 +61,9 @@ export function HeroSection({ onAnalyze, isLoading }: HeroSectionProps) {
             disabled={isLoading}
           />
 
-          <div className="grid gap-4 sm:grid-cols-3">
-            <input
-              type="text"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              placeholder="Заголовок"
-              className="w-full rounded-xl border border-input bg-card px-4 py-3 transition-all placeholder:text-muted-foreground/50 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
-              disabled={isLoading}
-            />
-            <input
-              type="text"
-              value={location}
-              onChange={(e) => setLocation(e.target.value)}
-              placeholder="Город / район"
-              className="w-full rounded-xl border border-input bg-card px-4 py-3 transition-all placeholder:text-muted-foreground/50 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
-              disabled={isLoading}
-            />
-            <input
-              type="number"
-              value={price}
-              onChange={(e) => setPrice(e.target.value)}
-              placeholder="Цена"
-              className="w-full rounded-xl border border-input bg-card px-4 py-3 transition-all placeholder:text-muted-foreground/50 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
-              disabled={isLoading}
-            />
-          </div>
-
-          <textarea
-            value={manualText}
-            onChange={(e) => setManualText(e.target.value)}
-            placeholder="Если страницу нельзя распарсить автоматически, вставьте сюда текст объявления или краткое описание условий аренды."
-            className="min-h-40 w-full rounded-xl border border-input bg-card px-4 py-3 text-base transition-all placeholder:text-muted-foreground/50 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
-            disabled={isLoading}
-          />
-
           <button
             type="submit"
-            disabled={isLoading || (!url.trim() && !manualText.trim())}
+            disabled={isLoading || !url.trim()}
             className="group relative w-full overflow-hidden rounded-xl bg-primary px-8 py-4 text-lg font-medium text-primary-foreground transition-all hover:scale-[1.02] hover:shadow-lg hover:shadow-primary/20 disabled:opacity-50 disabled:hover:scale-100"
           >
             {isLoading ? (
@@ -135,11 +92,11 @@ export function HeroSection({ onAnalyze, isLoading }: HeroSectionProps) {
           </div>
           <div className="flex items-center gap-2">
             <div className="h-2 w-2 rounded-full bg-primary" />
-            <span>Fallback на ручной ввод для Airbnb, Booking и других площадок</span>
+            <span>Автоматическая оценка рисков и надежности объявления</span>
           </div>
           <div className="flex items-center gap-2">
             <div className="h-2 w-2 rounded-full bg-primary" />
-            <span>AI-вердикт, риски и рекомендации в одном отчёте</span>
+            <span>Итоговый отчет с AI-вердиктом и рекомендациями</span>
           </div>
         </motion.div>
       </div>
