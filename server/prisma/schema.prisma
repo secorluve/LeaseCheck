@@ -1,0 +1,165 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum UserRole {
+  USER
+  ADMIN
+}
+
+enum RequestStatus {
+  PENDING
+  COMPLETED
+  FAILED
+}
+
+enum Verdict {
+  SAFE
+  SUSPICIOUS
+  NEEDS_MANUAL_REVIEW
+}
+
+enum RiskSeverity {
+  LOW
+  MEDIUM
+  HIGH
+}
+
+enum ListingPlatform {
+  KRISHA
+  OLX
+  AIRBNB
+  BOOKING
+  OTHER
+}
+
+enum AnalysisMode {
+  AI_PRIMARY
+  AI_FALLBACK
+  HEURISTIC_ONLY
+}
+
+enum FeedbackStatus {
+  NEW
+  REVIEWED
+  CLOSED
+}
+
+model User {
+  id                 String            @id @default(uuid())
+  name               String
+  email              String            @unique
+  passwordHash       String
+  role               UserRole          @default(USER)
+  subscriptionPlanId String?
+  subscriptionPlan   SubscriptionPlan? @relation(fields: [subscriptionPlanId], references: [id], onDelete: SetNull)
+  analyses           AnalysisRequest[]
+  savedReports       SavedReport[]
+  feedbackEntries    Feedback[]
+  createdAt          DateTime          @default(now())
+  updatedAt          DateTime          @updatedAt
+}
+
+model SubscriptionPlan {
+  id           String   @id @default(uuid())
+  code         String   @unique
+  name         String
+  description  String?
+  priceMonthly Decimal? @db.Decimal(10, 2)
+  currency     String   @default("USD")
+  features     Json?
+  isActive     Boolean  @default(true)
+  users        User[]
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model AnalysisRequest {
+  id             String          @id @default(uuid())
+  userId         String?
+  user           User?           @relation(fields: [userId], references: [id], onDelete: SetNull)
+  sourceUrl      String?
+  sourceHost     String?
+  manualText     String?
+  rawText        String?
+  platform       ListingPlatform @default(OTHER)
+  sourceMode     String?
+  status         RequestStatus   @default(PENDING)
+  errorMessage   String?
+  parsedListing  Json?
+  extractionMeta Json?
+  result         AnalysisResult?
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+
+  @@index([userId, createdAt])
+  @@index([platform, createdAt])
+}
+
+model AnalysisResult {
+  id                String          @id @default(uuid())
+  requestId         String          @unique
+  request           AnalysisRequest @relation(fields: [requestId], references: [id], onDelete: Cascade)
+  verdict           Verdict
+  score             Int
+  summary           String
+  recommendation    String
+  confidence        String?
+  analysisMode      AnalysisMode    @default(HEURISTIC_ONLY)
+  aiProvider        String?
+  aiModel           String?
+  aiRawResponse     Json?
+  heuristicSignals  Json?
+  positiveSignals   Json?
+  uncertaintySignals Json?
+  manualChecks      Json?
+  listingSnapshot   Json?
+  priceAnalytics    Json?
+  risks             RiskItem[]
+  savedBy           SavedReport[]
+  createdAt         DateTime        @default(now())
+  updatedAt         DateTime        @updatedAt
+}
+
+model RiskItem {
+  id               String         @id @default(uuid())
+  analysisResultId String
+  analysisResult   AnalysisResult @relation(fields: [analysisResultId], references: [id], onDelete: Cascade)
+  code             String?
+  title            String
+  description      String
+  severity         RiskSeverity
+  createdAt        DateTime       @default(now())
+
+  @@index([analysisResultId, severity])
+}
+
+model SavedReport {
+  id               String         @id @default(uuid())
+  userId           String
+  analysisResultId String
+  label            String?
+  user             User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  analysisResult   AnalysisResult @relation(fields: [analysisResultId], references: [id], onDelete: Cascade)
+  createdAt        DateTime       @default(now())
+
+  @@unique([userId, analysisResultId])
+}
+
+model Feedback {
+  id        String         @id @default(uuid())
+  userId    String?
+  user      User?          @relation(fields: [userId], references: [id], onDelete: SetNull)
+  name      String
+  email     String
+  message   String
+  status    FeedbackStatus @default(NEW)
+  createdAt DateTime       @default(now())
+  updatedAt DateTime       @updatedAt
+
+  @@index([status, createdAt])
+}

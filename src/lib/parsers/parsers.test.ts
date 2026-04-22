@@ -35,7 +35,10 @@ describe("source detection", () => {
   it("returns unsupported source", () => {
     const result = detectSource("https://example.com/listing/1");
     expect(result.ok).toBe(false);
-    if (!result.ok) expect(result.error.code).toBe("unsupported_source");
+    if (!("error" in result)) {
+      throw new Error("Expected unsupported source detection to fail");
+    }
+    expect(result.error.code).toBe("unsupported_source");
   });
 });
 
@@ -149,7 +152,10 @@ describe("pipeline failures", () => {
   it("returns invalid_url for malformed input", async () => {
     const result = await parseListingUrl("not a url");
     expect(result.ok).toBe(false);
-    if (!result.ok) expect(result.error.code).toBe("invalid_url");
+    if (!("error" in result)) {
+      throw new Error("Expected malformed URL parsing to fail");
+    }
+    expect(result.error.code).toBe("invalid_url");
   });
 
   it("returns fetch_failed when fetch throws", async () => {
@@ -157,7 +163,10 @@ describe("pipeline failures", () => {
     vi.stubGlobal("fetch", vi.fn().mockRejectedValue(new Error("network")));
     const result = await parseListingUrl("https://krisha.kz/a/show/1");
     expect(result.ok).toBe(false);
-    if (!result.ok) expect(result.error.code).toBe("fetch_failed");
+    if (!("error" in result)) {
+      throw new Error("Expected fetch failure for listing parsing");
+    }
+    expect(result.error.code).toBe("fetch_failed");
     vi.stubGlobal("fetch", original);
   });
 

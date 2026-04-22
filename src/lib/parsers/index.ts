@@ -7,10 +7,20 @@ import type { ParseListingResult } from "./types";
 
 export async function parseListingUrl(url: string): Promise<ParseListingResult> {
   const detected = detectSource(url);
-  if (!detected.ok) return detected;
+  if ("error" in detected) {
+    return {
+      ok: false,
+      error: detected.error,
+    };
+  }
 
   const fetched = await fetchListingHtml(url, detected.source);
-  if (!fetched.ok) return fetched;
+  if ("error" in fetched) {
+    return {
+      ok: false,
+      error: fetched.error,
+    };
+  }
 
   const parsed = detected.source === "krisha" ? parseKrisha(fetched.html, url) : parseOlx(fetched.html, url);
   if (!("source" in parsed)) return parsed;

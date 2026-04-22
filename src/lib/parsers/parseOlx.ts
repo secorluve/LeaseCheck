@@ -156,7 +156,7 @@ export function parseOlx(html: string, url: string): SourceRawListing | ParseFai
     extractionWarnings: warnings,
   };
 
-  if (!result.title && !result.price && result.images.length === 0) {
+  if (!result.title && !result.price && imageCandidates.length === 0) {
     return {
       ok: false,
       error: {

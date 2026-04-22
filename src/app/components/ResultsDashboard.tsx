@@ -1,20 +1,15 @@
-import { TrustScoreCard } from './TrustScoreCard';
-import { ListingDetailsCard } from './ListingDetailsCard';
-import { PriceAnalyticsCard } from './PriceAnalyticsCard';
-import { PriceAnalyticsDemo } from './PriceAnalyticsDemo';
-import { RiskAnalysisCard } from './RiskAnalysisCard';
-import { RecommendationsCard } from './RecommendationsCard';
-import { MapCard } from './MapCard';
-import { motion } from 'motion/react';
-import type { AnalysisResult } from '@/lib/analysis/types';
-import { generateMockPriceAnalytics } from '@/lib/analysis/mockPriceAnalytics';
-
-// Demo mode flag - set to true for presentation, false for production
-const useMockAnalytics = true;
+import { motion } from 'motion/react'
+import type { AnalysisResult } from '@/lib/analysis/types'
+import { ListingDetailsCard } from './ListingDetailsCard'
+import { MapCard } from './MapCard'
+import { PriceAnalyticsCard } from './PriceAnalyticsCard'
+import { RecommendationsCard } from './RecommendationsCard'
+import { RiskAnalysisCard } from './RiskAnalysisCard'
+import { TrustScoreCard } from './TrustScoreCard'
 
 interface ResultsDashboardProps {
-  listingUrl: string;
-  analysisResult: AnalysisResult | null;
+  listingUrl: string
+  analysisResult: AnalysisResult | null
 }
 
 export function ResultsDashboard({ listingUrl, analysisResult }: ResultsDashboardProps) {
@@ -26,30 +21,33 @@ export function ResultsDashboard({ listingUrl, analysisResult }: ResultsDashboar
         staggerChildren: 0.1,
       },
     },
-  };
+  }
 
   const item = {
     hidden: { opacity: 0, y: 20 },
     show: { opacity: 1, y: 0 },
-  };
+  }
 
-  const parsedListing = analysisResult?.ok ? analysisResult.listing : null;
+  const successfulAnalysis = analysisResult?.ok ? analysisResult : null
+  const parsedListing = successfulAnalysis?.listing ?? null
+  const analysisError = analysisResult?.ok === false ? analysisResult.error : null
+
   const listingDetails = {
-    price: parsedListing?.price,
-    city: parsedListing?.city ?? 'Не указано',
-    district: parsedListing?.district ?? 'Не указано',
-    street: parsedListing?.address ?? parsedListing?.rawAddress ?? 'Не указано',
-    rooms: parsedListing?.rooms !== undefined ? String(parsedListing.rooms) : 'Не указано',
-    area: parsedListing?.areaSqm !== undefined ? `${parsedListing.areaSqm} м²` : 'Не указано',
-    floor: parsedListing?.floor !== undefined ? String(parsedListing.floor) : 'Не указано',
-    totalFloors: parsedListing?.totalFloors !== undefined ? String(parsedListing.totalFloors) : 'Не указано',
-    rentalType: parsedListing?.rentalType ?? 'Не указано',
-  };
+    price: parsedListing?.price ?? undefined,
+    city: parsedListing?.city ?? 'РќРµ СѓРєР°Р·Р°РЅРѕ',
+    district: parsedListing?.district ?? 'РќРµ СѓРєР°Р·Р°РЅРѕ',
+    street: parsedListing?.address ?? 'РќРµ СѓРєР°Р·Р°РЅРѕ',
+    rooms: parsedListing?.rooms != null ? String(parsedListing.rooms) : 'РќРµ СѓРєР°Р·Р°РЅРѕ',
+    area: parsedListing?.areaSqm != null ? `${parsedListing.areaSqm} РјВІ` : 'РќРµ СѓРєР°Р·Р°РЅРѕ',
+    floor: parsedListing?.floor != null ? String(parsedListing.floor) : 'РќРµ СѓРєР°Р·Р°РЅРѕ',
+    totalFloors: parsedListing?.totalFloors != null ? String(parsedListing.totalFloors) : 'РќРµ СѓРєР°Р·Р°РЅРѕ',
+    rentalType: parsedListing?.rentalType ?? 'РќРµ СѓРєР°Р·Р°РЅРѕ',
+  }
 
   const mapData = {
     verified: Boolean(parsedListing?.coordinates),
-    coordinates: parsedListing?.coordinates,
-  };
+    coordinates: parsedListing?.coordinates ?? undefined,
+  }
 
   return (
     <motion.div
@@ -58,80 +56,78 @@ export function ResultsDashboard({ listingUrl, analysisResult }: ResultsDashboar
       animate="show"
       className="space-y-8 py-8 pb-20"
     >
-      {/* URL Display */}
       <motion.div variants={item} className="rounded-lg border border-border/50 bg-card/50 px-4 py-3">
         <p className="truncate text-sm text-muted-foreground">
-          <span className="font-medium text-foreground">Анализ:</span> {listingUrl}
+          <span className="font-medium text-foreground">РђРЅР°Р»РёР·:</span> {listingUrl}
         </p>
       </motion.div>
 
-      {!analysisResult?.ok && analysisResult ? (
+      {analysisError ? (
         <motion.div variants={item} className="rounded-lg border border-red-500/30 bg-red-500/5 px-4 py-3">
-          <p className="text-sm font-medium text-red-500">Ошибка парсинга: {analysisResult.error.code}</p>
-          <p className="mt-1 text-sm text-muted-foreground">{analysisResult.error.message}</p>
+          <p className="text-sm font-medium text-red-500">РћС€РёР±РєР° Р°РЅР°Р»РёР·Р°: {analysisError.code}</p>
+          <p className="mt-1 text-sm text-muted-foreground">{analysisError.message}</p>
         </motion.div>
       ) : null}
 
-      {/* Trust Score - Full Width */}
       <motion.div variants={item}>
         <TrustScoreCard
-          score={analysisResult?.ok ? analysisResult.trustScore : 0}
-          confidence={analysisResult?.ok ? analysisResult.confidence : 'Низкая'}
+          score={successfulAnalysis?.trustScore ?? 0}
+          confidence={successfulAnalysis?.confidence ?? 'low'}
+          verdict={successfulAnalysis?.verdict ?? 'Needs Manual Review'}
+          summary={
+            successfulAnalysis
+              ? successfulAnalysis.summary ??
+                'РћР±СЉСЏРІР»РµРЅРёРµ РїСЂРѕР°РЅР°Р»РёР·РёСЂРѕРІР°РЅРѕ, РЅРѕ РёС‚РѕРіРѕРІРѕРµ РїРѕСЏСЃРЅРµРЅРёРµ РЅРµ Р±С‹Р»Рѕ СЃС„РѕСЂРјРёСЂРѕРІР°РЅРѕ.'
+              : 'РЎРµСЂРІРёСЃ РЅРµ СЃРјРѕРі СЃРѕР±СЂР°С‚СЊ РґРѕСЃС‚Р°С‚РѕС‡РЅРѕРµ РєРѕР»РёС‡РµСЃС‚РІРѕ РґР°РЅРЅС‹С… РґР»СЏ РёС‚РѕРіРѕРІРѕРіРѕ РІРµСЂРґРёРєС‚Р°.'
+          }
         />
       </motion.div>
 
-      {/* Two Column Layout */}
       <motion.div variants={item} className="grid gap-8 lg:grid-cols-2">
         <ListingDetailsCard listing={listingDetails} />
-        {useMockAnalytics ? (
-          <PriceAnalyticsDemo data={generateMockPriceAnalytics(parsedListing?.price || 150000)} />
-        ) : (
-          <PriceAnalyticsCard
-            analysis={{
-              listingPrice: analysisResult?.ok ? analysisResult.priceAnalytics.listingPrice : null,
-              cityAveragePrice: analysisResult?.ok ? analysisResult.priceAnalytics.cityAveragePrice ?? null : null,
-              districtAveragePrice: analysisResult?.ok ? analysisResult.priceAnalytics.districtAveragePrice ?? null : null,
-              comparisonPercent: analysisResult?.ok ? analysisResult.priceAnalytics.comparisonPercent ?? null : null,
-              comparisonText: analysisResult?.ok ? analysisResult.priceAnalytics.comparisonText ?? null : null,
-              periodLabel: analysisResult?.ok ? analysisResult.priceAnalytics.periodLabel ?? '6 месяцев' : '6 месяцев',
-              chart: analysisResult?.ok
-                ? (analysisResult.priceAnalytics.trend ?? []).map((item) => ({
-                    label: item.label,
-                    city: item.cityPrice ?? null,
-                    district: item.districtPrice ?? null,
-                    listing: item.listingPrice ?? null,
-                  }))
-                : [],
-              hasDistrictData:
-                analysisResult?.ok &&
-                analysisResult.priceAnalytics.districtAveragePrice != null &&
-                (analysisResult.priceAnalytics.trend ?? []).some(
-                  (item) => item.districtPrice != null,
-                ),
-            }}
-          />
-        )}
-      </motion.div>
-
-      {/* Risk Analysis - Full Width */}
-      <motion.div variants={item}>
-        <RiskAnalysisCard
-          risks={{
-            positive: analysisResult?.ok ? analysisResult.risks.positive : [],
-            negative: analysisResult?.ok ? analysisResult.risks.negative : [],
-            uncertainty: analysisResult?.ok ? analysisResult.risks.uncertainty : [],
+        <PriceAnalyticsCard
+          analysis={{
+            listingPrice: successfulAnalysis?.priceAnalytics.listingPrice ?? null,
+            cityAveragePrice: successfulAnalysis?.priceAnalytics.cityAveragePrice ?? null,
+            districtAveragePrice: successfulAnalysis?.priceAnalytics.districtAveragePrice ?? null,
+            comparisonPercent: successfulAnalysis?.priceAnalytics.comparisonPercent ?? null,
+            comparisonText: successfulAnalysis?.priceAnalytics.comparisonText ?? null,
+            marketPositionLabel: successfulAnalysis?.priceAnalytics.marketPositionLabel ?? null,
+            disclaimer: successfulAnalysis?.priceAnalytics.disclaimer ?? null,
+            periodLabel: successfulAnalysis?.priceAnalytics.periodLabel ?? 'РќРµРґРѕСЃС‚СѓРїРЅРѕ',
+            chart: successfulAnalysis
+              ? (successfulAnalysis.priceAnalytics.trend ?? []).map((trendItem) => ({
+                  label: trendItem.label,
+                  city: trendItem.cityPrice ?? null,
+                  district: trendItem.districtPrice ?? null,
+                  listing: trendItem.listingPrice ?? null,
+                }))
+              : [],
+            hasDistrictData:
+              successfulAnalysis?.priceAnalytics.districtAveragePrice != null &&
+              (successfulAnalysis.priceAnalytics.trend ?? []).some((trendItem) => trendItem.districtPrice != null),
           }}
         />
       </motion.div>
 
-      {/* Two Column Layout */}
+      <motion.div variants={item}>
+        <RiskAnalysisCard
+          risks={{
+            positive: successfulAnalysis?.risks.positive ?? [],
+            negative: successfulAnalysis?.risks.negative ?? [],
+            uncertainty: successfulAnalysis?.risks.uncertainty ?? [],
+            items: successfulAnalysis?.risks.items ?? [],
+          }}
+        />
+      </motion.div>
+
       <motion.div variants={item} className="grid gap-8 lg:grid-cols-2">
         <RecommendationsCard
           recommendations={
-            analysisResult?.ok
+            successfulAnalysis
               ? [
-                  ...analysisResult.recommendations.map((item) => item.text),
-                  ...analysisResult.manualCheckRecommendations,
+                  ...successfulAnalysis.recommendations.map((item) => item.text),
+                  ...successfulAnalysis.manualCheckRecommendations,
                 ]
               : []
           }
@@ -139,5 +135,5 @@ export function ResultsDashboard({ listingUrl, analysisResult }: ResultsDashboar
         <MapCard mapData={mapData} address={listingDetails.street} />
       </motion.div>
     </motion.div>
-  );
+  )
 }

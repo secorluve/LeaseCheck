@@ -75,6 +75,7 @@ export function parseKrisha(html: string, url: string): SourceRawListing | Parse
   const advert = windowData?.advert as Record<string, unknown> | undefined;
   const adverts = windowData?.adverts as unknown[] | undefined;
   const firstAdvert = adverts?.[0] as Record<string, unknown> | undefined;
+  const advertAddress = advert?.address as Record<string, unknown> | undefined;
 
   const structuredTitle = cleanText(advert?.title as string) ?? cleanText(firstAdvert?.title as string);
   const structuredDescription = cleanText(firstAdvert?.description as string);
@@ -82,8 +83,8 @@ export function parseKrisha(html: string, url: string): SourceRawListing | Parse
   const structuredRooms = toIntegerInRange(advert?.rooms, 1, 20);
   const structuredArea = toNumber(advert?.square);
   const structuredAddress = cleanText(advert?.addressTitle as string) ?? cleanText(firstAdvert?.address as string);
-  const structuredCity = cleanText(advert?.address?.city as string);
-  const structuredDistrict = cleanText(advert?.address?.district as string);
+  const structuredCity = cleanText(advertAddress?.city as string);
+  const structuredDistrict = cleanText(advertAddress?.district as string);
   const structuredImages = asStringArray(advert?.photos);
   const structuredOwnerName = cleanText(advert?.ownerName as string) ?? cleanText(firstAdvert?.owner as string);
   const structuredAnalysisUrl = cleanText(windowData?.analysisUrl as string);
@@ -240,7 +241,7 @@ export function parseKrisha(html: string, url: string): SourceRawListing | Parse
     extractionWarnings: warnings,
   };
 
-  if (!result.title && !result.price && result.images.length === 0) {
+  if (!result.title && !result.price && imageCandidates.length === 0) {
     return {
       ok: false,
       error: {

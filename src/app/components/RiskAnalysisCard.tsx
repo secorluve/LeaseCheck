@@ -1,20 +1,30 @@
-import { CheckCircle2, AlertCircle, HelpCircle } from 'lucide-react';
+import { CheckCircle2, AlertCircle, HelpCircle } from 'lucide-react'
 
 interface RiskAnalysisCardProps {
   risks: {
-    positive: string[];
-    negative: string[];
-    uncertainty: string[];
-  };
+    positive: string[]
+    negative: string[]
+    uncertainty: string[]
+    items: Array<{
+      title: string
+      description: string
+      severity: 'low' | 'medium' | 'high'
+    }>
+  }
 }
 
 export function RiskAnalysisCard({ risks }: RiskAnalysisCardProps) {
+  const severityClass = (severity: 'low' | 'medium' | 'high') => {
+    if (severity === 'high') return 'border-red-500/30 bg-red-500/5 text-red-500'
+    if (severity === 'medium') return 'border-yellow-500/30 bg-yellow-500/5 text-yellow-500'
+    return 'border-primary/30 bg-primary/5 text-primary'
+  }
+
   return (
     <div className="group rounded-2xl border border-border/50 bg-card p-6 transition-all hover:border-border hover:shadow-lg hover:shadow-primary/5">
       <h3 className="mb-6 text-xl font-semibold">Анализ рисков</h3>
 
       <div className="grid gap-6 lg:grid-cols-3">
-        {/* Positive Signals */}
         <div className="space-y-3">
           <div className="flex items-center gap-2 text-primary">
             <CheckCircle2 className="h-5 w-5" />
@@ -33,11 +43,10 @@ export function RiskAnalysisCard({ risks }: RiskAnalysisCardProps) {
           </div>
         </div>
 
-        {/* Negative Signals */}
         <div className="space-y-3">
           <div className="flex items-center gap-2 text-red-500">
             <AlertCircle className="h-5 w-5" />
-            <h4 className="font-medium">Признаки мошенничества</h4>
+            <h4 className="font-medium">Подозрительные признаки</h4>
           </div>
           <div className="space-y-2">
             {risks.negative.length === 0 ? (
@@ -60,12 +69,12 @@ export function RiskAnalysisCard({ risks }: RiskAnalysisCardProps) {
         <div className="space-y-3">
           <div className="flex items-center gap-2 text-yellow-500">
             <HelpCircle className="h-5 w-5" />
-            <h4 className="font-medium">Что не удалось подтвердить</h4>
+            <h4 className="font-medium">Что осталось неопределённым</h4>
           </div>
           <div className="space-y-2">
             {risks.uncertainty.length === 0 ? (
               <div className="rounded-lg border border-yellow-500/20 bg-yellow-500/5 p-3 text-sm">
-                Существенных зон неопределенности не выявлено
+                Существенных зон неопределённости не выявлено
               </div>
             ) : null}
             {risks.uncertainty.map((signal, index) => (
@@ -80,6 +89,25 @@ export function RiskAnalysisCard({ risks }: RiskAnalysisCardProps) {
           </div>
         </div>
       </div>
+
+      {risks.items.length > 0 ? (
+        <div className="mt-8 space-y-3">
+          <h4 className="text-base font-medium">Подробные найденные риски</h4>
+          <div className="space-y-3">
+            {risks.items.map((risk, index) => (
+              <div key={`${risk.title}-${index}`} className="rounded-xl border border-border/40 bg-muted/20 p-4">
+                <div className="flex items-center justify-between gap-3">
+                  <div className="font-medium">{risk.title}</div>
+                  <span className={`rounded-full border px-3 py-1 text-xs font-medium uppercase ${severityClass(risk.severity)}`}>
+                    {risk.severity}
+                  </span>
+                </div>
+                <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{risk.description}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      ) : null}
     </div>
-  );
+  )
 }
