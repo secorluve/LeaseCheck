@@ -6,8 +6,14 @@ import { createApp } from './app'
 import { seedSubscriptionPlans } from './services/bootstrap.service'
 
 async function bootstrap() {
+  logger.info('Bootstrapping LeaseCheck API')
+  logger.info('Connecting to database')
   await prisma.$connect()
+  logger.info('Database connected')
+
+  logger.info('Applying startup seed data')
   await seedSubscriptionPlans()
+  logger.info('Startup seed completed')
 
   const app = createApp()
   const server = createServer(app)
